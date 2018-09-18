@@ -1,0 +1,8 @@
+from pathlib import Path
+APPEARANCES_OUTFILE = "detecciones.txt"
+DATA_FOLDER = Path("data/")
+
+# FEATURE EXTRACTION
+SAMPLES_PER_SECOND = 1
+SOBEL_THRESH = 150
+SAMPLING_DIMENSIONS = (64, 64)
