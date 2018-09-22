@@ -26,7 +26,7 @@ def extract_features_from_video(filename,
 
     video_path = str(data_folder_path / filename)
     cache_filename = "{}{}_{}_{}spd".format(cache_prefix, filename, ft_type.name, sps)
-    cache_path = str(CACHE_FOLDER / cache_filename) + ".npy"
+    cache_path = str(CACHE_FOLDER / "features" / cache_filename) + ".npy"
     if use_cache:
         # check if features are cached
         try:
