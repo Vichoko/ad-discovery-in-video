@@ -93,15 +93,14 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
                 ad_frame_name = "{}_{}".format(ad_idx, ad_frame_idx)  # KNN output format: {ad_idx}_{frame_idx}
                 relative_frame_idx = ad_frame_idx + starting_frame_idx
                 try:
-                    # knn_priority = list(knn_list[frame_idx+ad_frame_idx]).index(ad_frame_name) + 1  # 1 means that this ad frame is the nearest
-                    # ad_intersection_score += 1.0 / knn_priority
-                    # intersection_frame_counter = ad_frame_idx
-                    if ad_frame_name in knn_list[relative_frame_idx]:
-                        ad_intersection_score += 1.0
-                        intersection_frame_counter = ad_frame_idx
+                    knn_priority = list(knn_list[starting_frame_idx+ad_frame_idx]).index(ad_frame_name) + 1  # 1 means that this ad frame is the nearest
+                    ad_intersection_score += 1.0 / knn_priority
+                    intersection_frame_counter = ad_frame_idx
+                    # if ad_frame_name in knn_list[relative_frame_idx]:
+                    #     ad_intersection_score += 1.0
+                    #     intersection_frame_counter = ad_frame_idx
                 except ValueError as e:
                     # ad frame doesn't appear in the frame's knn
-                    print("error: {}".format(e))
                     pass
                 except IndexError:
                     break
@@ -121,20 +120,7 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
                                          })
                 if DEBUG:
                     passed_scores.append(probability)
-
-                    # max_score = max(ad_intersection_scores)  # get the max probability of the ad starts in a frame
-                    # max_score_starting_frame = ad_intersection_scores.index(max_score)  # the index is the frame where it starts
-                    # max_score_ad_length = ad_estimated_length_per_video_frame[max_score_starting_frame]  # the length is a param
-                    # print("info: max score {}".format(max_score))
-                    # for
-                    # if float(max_score) > SCORE_THRESHOLD:
-                    #     # if knn discovered a sequence composed by at least a half of the ad's frames, then
-                    #     # mark it as an occurrence
-                    #     ad_matching_list.append({'ad_idx': ad_idx,
-                    #                              'ad_length_in_frames': max_score_ad_length,
-                    #                              'score': max_score,
-                    #                              'starting_frame': max_score_starting_frame,
-                    #                              })
+    # finally,
     # export to file
     ad_matching_list = sorted(ad_matching_list, key=lambda dic: dic['starting_frame'])
     with open(APPEARANCES_OUTFILE, 'w') as fp:
@@ -149,7 +135,6 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
         print("info: Detected ads exported to {}".format(APPEARANCES_OUTFILE))
     if DEBUG:
         print("debug: score mean {}, std {}".format(all_scores_mean_n_std()[0], all_scores_mean_n_std()[1]))
-
         print("debug: passed score mean {}, std {}".format(passed_scores_mean_n_std()[0], passed_scores_mean_n_std()[1]))
     return ad_matching_list
 
