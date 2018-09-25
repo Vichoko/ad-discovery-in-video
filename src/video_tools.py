@@ -1,11 +1,8 @@
 import numpy
-import cv2
-import os
+
 from hashlib import sha256
 
-from os import listdir
-
-from src.configurations import CACHE_FOLDER, SAMPLES_PER_SECOND, APPEARANCES_OUTFILE, DATA_FOLDER, SCORE_THRESHOLD
+from src.configurations import CACHE_FOLDER, SAMPLES_PER_SECOND, APPEARANCES_OUTFILE, SCORE_THRESHOLD
 
 DEBUG = True
 if DEBUG:
@@ -19,6 +16,8 @@ def batch_knn(video_features, ads_features, k=5, use_cache=True):
     """
     Calculates KNN of each video frame against every ad frame.
     
+    :param k: k of the KNN
+    :param use_cache: Flag to use cached version if available
     :param video_features: Features of each frame of the video (shape: [sampled_frames, features])
     :param ads_features: Features of each frame, of each ad (shape: [ad_no, sampled_frames, features])
     :return: KNN of every frame of the video (shape: [video_frame, i_nearest_neighbor]) 
@@ -67,6 +66,8 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
     """
     Identify ad appearances in the video based on KNN results.
     Export results to APPEARANCES_OUTFILE.
+    :param video_name: name of the video to be shown in outfile
+    :param ad_names: names of ads to be shown in outfile
     :param ad_lengths: List of frames sampled for each ad in the same order as the ads_features passed to the KNN.
     :param knn_list: KNN of each frame of the original video.
     :return: None
@@ -91,15 +92,15 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
                 # check if each ad frame matches sequentially within the KNN frames,
                 # starting in index: frame_idx UNTIL frame_idx+ad_length
                 ad_frame_name = "{}_{}".format(ad_idx, ad_frame_idx)  # KNN output format: {ad_idx}_{frame_idx}
-                relative_frame_idx = ad_frame_idx + starting_frame_idx
                 try:
                     knn_priority = list(knn_list[starting_frame_idx+ad_frame_idx]).index(ad_frame_name) + 1  # 1 means that this ad frame is the nearest
+                    # the score given decays as the matched frame is farther in the KNN result, 1 is max
                     ad_intersection_score += 1.0 / knn_priority
                     intersection_frame_counter = ad_frame_idx
                     # if ad_frame_name in knn_list[relative_frame_idx]:
                     #     ad_intersection_score += 1.0
                     #     intersection_frame_counter = ad_frame_idx
-                except ValueError as e:
+                except ValueError:
                     # ad frame doesn't appear in the frame's knn
                     pass
                 except IndexError:
@@ -140,28 +141,23 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
 
 
 def frame_idx_to_seconds(frame_idx, sps=SAMPLES_PER_SECOND):
+    """
+    Transform a frame_id to the timestamp in seconds of the video, based on the sampling configuration.
+    :param frame_idx: Frame idx to be timestamped
+    :param sps: Samples per second used in sampling of the features
+    :return: 
+    """
     return 1.0 * frame_idx / sps
 
 
 def get_ad_lengths_in_frames(ads_features):
+    """
+    Self-explainatory
+    :param ads_features: has dimension [ad_idx, ad_frame_idx, feature_idx]
+    :return: Ad length in frames
+    """
     ad_lengths_in_frames = []
     for ad_features in ads_features:
         ad_lengths_in_frames.append(ad_features.shape[0])
     return ad_lengths_in_frames
 
-
-"""
-From https://github.com/juanbarrios/teaching-MIR/blob/master/python/Ejemplos.ipynb
-"""
-
-
-def mostrar_frame(window_name, imagen, valorAbsoluto=False, escalarMin0Max255=False):
-    if valorAbsoluto:
-        imagen_abs = numpy.abs(imagen)
-    else:
-        imagen_abs = imagen
-    if escalarMin0Max255:
-        imagen_norm = cv2.normalize(imagen_abs, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-    else:
-        imagen_norm = imagen_abs
-    cv2.imshow(window_name, imagen_norm)
