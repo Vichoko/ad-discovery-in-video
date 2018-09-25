@@ -20,21 +20,28 @@ def extract_features_from_video(filename,
                                 ft_type=FeatureType.SOBEL_THRESH_BINARY,
                                 data_folder_path=DATA_FOLDER,
                                 use_cache=True,
-                                cache_prefix = ""):
+                                cache_prefix=""):
     """
     Extract features from video
-    :param fps: 
-    :param sps: 
-    :param ft_type: 
-    :param data_folder_path: 
-    :param use_cache: 
-    :param cache_prefix: 
+    :param fps: Frames per second of the video to be sampled
+    :param sps: Samples per second to be sampled
+    :param ft_type: Feature type to be extracted, options are in FeatureType Enum
+    :param data_folder_path: Path of the folder containing the video file to be sampled
+    :param use_cache: Flag to use cache if available
+    :param cache_prefix: Prefix of the cached files
     :param filename: Filename from video in DATA_FOLDER
     :return: Features of video, with shape [sampled_frames, features]
     """
 
     video_path = str(data_folder_path / filename)
-    cache_filename = "{}{}_{}{}_{}spd_{}".format(cache_prefix, filename, ft_type.name, SOBEL_THRESH, sps, str(SAMPLING_DIMENSIONS))
+    cache_filename = "{}{}_{}{}_{}spd_{}".format(
+        cache_prefix,
+        filename,
+        ft_type.name,
+        SOBEL_THRESH,
+        sps,
+        str(SAMPLING_DIMENSIONS)
+    )
     cache_path = str(CACHE_FOLDER / "features" / cache_filename) + ".npy"
     if use_cache:
         # check if features are cached
@@ -132,5 +139,7 @@ def extract_features_from_video_folder(foldername,
                                                     cache_prefix=foldername+"_"))
         video_names.append(filename.split(".")[0])
     if not features:
-        raise AssertionError("Feature vector is empty. Check extensions () and if video folder is empty.".format(str(video_extensions)))
+        raise AssertionError("Feature vector is empty. Check extensions () and if video folder is empty.".format(
+            str(video_extensions)
+        ))
     return numpy.asarray(features), video_names

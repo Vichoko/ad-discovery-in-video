@@ -20,7 +20,8 @@ from src.configurations import K
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        raise AttributeError("Script receives 2 parameters: \"full-length video filename\" and \"ad video-clip folder\"")
+        raise AttributeError("Script receives 2 parameters: \"full-length video filename\" "
+                             "and \"ad video-clip folder\"")
     print("Welcome to the advertising clip detector!")
     video_filename = sys.argv[1]
     video_name = video_filename.split('.')[0]

@@ -11,16 +11,26 @@ Finding advertising clips in a full-length video.
 python adlookup.py <tv-video-filename> <ad-foldername>
 ```
 
-TV Video & Ad Folder should be in ```./data/``` or in path set in DATA_FOLDER (Refer to [Config](#configuration file)
+TV Video & Ad Folder should be in ```./data/```, or in path set in
+DATA_FOLDER (Refer to Configuration file).
 
 ## Example
 ```
 python adlookup.py mega-2014_04_23.mp4 ads
 ```
 
+Wait until it finishes.
+## Evaluation
+```
+python evaluar.py detecciones.txt
+```
+
+Read metrics is STDOUT.
+
 # Configuration file
 
-in ```./src/configurations.py```
+In ```./src/configurations.py```
+
 Can be changed if needed.
 
 ```

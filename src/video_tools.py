@@ -93,7 +93,8 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
                 # starting in index: frame_idx UNTIL frame_idx+ad_length
                 ad_frame_name = "{}_{}".format(ad_idx, ad_frame_idx)  # KNN output format: {ad_idx}_{frame_idx}
                 try:
-                    knn_priority = list(knn_list[starting_frame_idx+ad_frame_idx]).index(ad_frame_name) + 1  # 1 means that this ad frame is the nearest
+                    knn_priority = list(knn_list[starting_frame_idx+ad_frame_idx]).index(ad_frame_name) + 1  # 1
+                    # means that this ad frame is the nearest
                     # the score given decays as the matched frame is farther in the KNN result, 1 is max
                     ad_intersection_score += 1.0 / knn_priority
                     intersection_frame_counter = ad_frame_idx
@@ -136,7 +137,10 @@ def ads_detector(knn_list, video_name, ad_lengths, ad_names):
         print("info: Detected ads exported to {}".format(APPEARANCES_OUTFILE))
     if DEBUG:
         print("debug: score mean {}, std {}".format(all_scores_mean_n_std()[0], all_scores_mean_n_std()[1]))
-        print("debug: passed score mean {}, std {}".format(passed_scores_mean_n_std()[0], passed_scores_mean_n_std()[1]))
+        print("debug: passed score mean {}, std {}".format(
+            passed_scores_mean_n_std()[0],
+            passed_scores_mean_n_std()[1])
+        )
     return ad_matching_list
 
 

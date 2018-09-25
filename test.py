@@ -21,7 +21,7 @@ class TestKNN(unittest.TestCase):
 
     def test_knn_from_features(self):
         ad0 = [[8, 8], [9, 9], [10, 10]]
-        ad1 = [[4, 4],[5, 5]]
+        ad1 = [[4, 4], [5, 5]]
 
         video = [[1, 1], [2, 2], [4, 4], [4, 4], [5, 5], [5, 5], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11]]
 
@@ -48,7 +48,6 @@ class TestKNN(unittest.TestCase):
         starting_frame = detections[1]['starting_frame']
         for ad_frame_idx, ad_frame in enumerate(ad1):
             self.assertEqual(video[starting_frame+ad_frame_idx], ad_frame)
-
 
 
 if __name__ == '__main__':
