@@ -2,14 +2,17 @@ from enum import Enum
 from os import listdir
 import numpy
 
-from src.configurations import DATA_FOLDER, SAMPLES_PER_SECOND, SAMPLING_DIMENSIONS, SOBEL_THRESH, CACHE_FOLDER
+from src.configurations import DATA_FOLDER, SAMPLES_PER_SECOND, SAMPLING_DIMENSIONS, SOBEL_THRESH, CACHE_FOLDER, \
+    SUPPORTED_EXTENSIONS
 import cv2
+
 
 class FeatureType(Enum):
     GRAY_SCALE = 1
     SOBEL_GRAD_CONCAT = 2
     SOBEL_GRAD_MAGNITUDE = 4
     SOBEL_THRESH_BINARY = 3
+
 
 def extract_features_from_video(filename,
                                 fps=30,
@@ -20,12 +23,18 @@ def extract_features_from_video(filename,
                                 cache_prefix = ""):
     """
     Extract features from video
+    :param fps: 
+    :param sps: 
+    :param ft_type: 
+    :param data_folder_path: 
+    :param use_cache: 
+    :param cache_prefix: 
     :param filename: Filename from video in DATA_FOLDER
     :return: Features of video, with shape [sampled_frames, features]
     """
 
     video_path = str(data_folder_path / filename)
-    cache_filename = "{}{}_{}_{}spd".format(cache_prefix, filename, ft_type.name, sps)
+    cache_filename = "{}{}_{}{}_{}spd_{}".format(cache_prefix, filename, ft_type.name, SOBEL_THRESH, sps, str(SAMPLING_DIMENSIONS))
     cache_path = str(CACHE_FOLDER / "features" / cache_filename) + ".npy"
     if use_cache:
         # check if features are cached
@@ -35,7 +44,6 @@ def extract_features_from_video(filename,
             return features
         except FileNotFoundError:
             pass
-
 
     capture = cv2.VideoCapture(video_path)
     skipped_frames = 0
@@ -55,10 +63,10 @@ def extract_features_from_video(filename,
             continue
         skipped_frames = 0
 
-        # downsample dimensions
+        # down-sampling dimensions
         frame = cv2.resize(frame, SAMPLING_DIMENSIONS)
 
-        # gray
+        # gray scaling
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if ft_type == FeatureType.GRAY_SCALE:
             # feature type is Gray Scale; append and continue
@@ -81,7 +89,7 @@ def extract_features_from_video(filename,
             continue
 
         # to binary (0s and 255s)
-        retval, borders = cv2.threshold(grad_magnitude, thresh=SOBEL_THRESH, maxval=255, type=cv2.THRESH_BINARY)
+        _, borders = cv2.threshold(grad_magnitude, thresh=SOBEL_THRESH, maxval=255, type=cv2.THRESH_BINARY)
         # feature type is Thresh; append and continue
         features.append(borders.flatten())
     features = numpy.asarray(features)
@@ -94,17 +102,23 @@ def extract_features_from_video(filename,
         pass
     return features
 
+
 def extract_features_from_video_folder(foldername,
-                                       video_extensions = ["mpg", "mp4"],
+                                       video_extensions=SUPPORTED_EXTENSIONS,
                                        fps=30,
                                        sps=SAMPLES_PER_SECOND,
                                        ft_type=FeatureType.SOBEL_THRESH_BINARY):
     """
     Extract features of each video in the folder
+    :param video_extensions: 
+    :param fps: 
+    :param sps: 
+    :param ft_type: 
     :param foldername: Folder path containing ad videos in DATA_FOLDER.
     :return: Features of each video, with shape [videos_in_folder, sampled_frames, features]
     """
     features = []
+    video_names = []
     video_folder_path = DATA_FOLDER / foldername
     for filename in listdir(str(video_folder_path)):
         if filename[-3:] not in video_extensions:
@@ -116,6 +130,7 @@ def extract_features_from_video_folder(foldername,
                                                     ft_type,
                                                     video_folder_path,
                                                     cache_prefix=foldername+"_"))
+        video_names.append(filename.split(".")[0])
     if not features:
         raise AssertionError("Feature vector is empty. Check extensions () and if video folder is empty.".format(str(video_extensions)))
-    return numpy.asarray(features)
+    return numpy.asarray(features), video_names
